@@ -1,9 +1,8 @@
 mod tmux;
+mod ui;
 
 extern crate skim;
 
-use skim::prelude::*;
-use std::io::Cursor;
 use std::path::Path;
 use std::{env::var, process::Command};
 
@@ -51,39 +50,63 @@ fn get_basename(location: &str) -> Option<&str> {
 }
 
 fn get_item() -> Option<String> {
+    if let Some(config) = get_config_file_location() {
+        let list = match get_config_file_output(config.to_owned()) {
+            Some(file_data) => {
+                if file_data.eq("") {
+                    match get_zoxide_output() {
+                        Some(data) => Some(data),
+                        None => {
+                            std::fs::write(config, file_data).unwrap_or_default();
+                            None
+                        }
+                    }
+                } else {
+                    Some(file_data)
+                }
+            }
+            None => get_zoxide_output(),
+        };
+
+        if let Some(list) = list {
+            ui::select(list)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+fn get_zoxide_output() -> Option<String> {
     match Command::new("zoxide").args(["query", "-l"]).output() {
         Ok(list) => {
-            let list = std::str::from_utf8(&list.stdout).unwrap_or_default();
-            return select(list);
+            return Some(
+                std::str::from_utf8(&list.stdout)
+                    .unwrap_or_default()
+                    .to_owned(),
+            )
         }
         Err(_) => None,
     }
 }
 
-fn select(list: &str) -> Option<String> {
-    let options = SkimOptionsBuilder::default()
-        //.height(Some("50%"))
-        //.multi(false)
-        .build()
-        .unwrap();
+fn get_config_file_output(location: String) -> Option<String> {
+    let path = Path::new(&location);
 
-    let input = list.to_string();
-
-    // `SkimItemReader` is a helper to turn any `BufRead` into a stream of `SkimItem`
-    // `SkimItem` was implemented for `AsRef<str>` by default
-    let item_reader = SkimItemReader::default();
-    let items = item_reader.of_bufread(Cursor::new(input));
-
-    // `run_with` would read and show items from the stream
-    let selected_item = Skim::run_with(&options, Some(items))
-        .map(|out| out.selected_items)
-        .unwrap_or_else(|| Vec::new());
-
-    if let Some(item) = selected_item.first() {
-        let text = item.text();
-
-        return Some(text.into_owned());
+    if path.exists() && path.is_file() {
+        Some(std::fs::read_to_string(path).unwrap_or_default())
+    } else {
+        None
     }
+}
 
-    None
+fn get_config_file_location() -> Option<String> {
+    match dirs::config_dir() {
+        Some(path) => {
+            let path = format!("{}/{}", path.display(), ".tmux-switcher");
+            Some(path)
+        }
+        None => None,
+    }
 }

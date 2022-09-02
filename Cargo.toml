@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 tmux_interface = "0.2.1"
 skim = "0.9.4"
+dirs = "4.0.0"
