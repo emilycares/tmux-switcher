@@ -7,14 +7,12 @@ pub fn does_session_exist(name: &str) -> bool {
 
     if let Ok(sessions) = sessions {
         let sessions = sessions.to_string();
-        let mut sessions: Vec<&str> = sessions.split("\n").collect();
-        let sessions: Vec<&str> = sessions
-            .iter_mut()
+        return sessions
+            .split('\n')
+            .into_iter()
             .filter_map(|item| item.split_once(':'))
             .map(|item| item.0)
-            .collect();
-
-        return sessions.contains(&name);
+            .any(|x| x == name);
     }
 
     false

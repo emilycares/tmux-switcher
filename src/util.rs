@@ -1,5 +1,5 @@
-use std::{process::Command, path::Path};
 use itertools::Itertools;
+use std::{path::Path, process::Command};
 
 /// Get name of last file/folder in path
 pub fn get_basename(location: &str) -> Option<&str> {
@@ -56,7 +56,8 @@ fn is_ignored(location: &str) -> bool {
     if location.contains(".local/share/nvim/site/pack/packer/start") {
         return false;
     }
-    return true;
+
+    true
 }
 
 /// Determine if directory has a git directory
@@ -65,9 +66,7 @@ fn is_git_dir(location: &str) -> bool {
     let path = Path::new(&git_folder);
 
     match std::fs::metadata(path) {
-        Ok(meta) => {
-            return meta.is_dir();
-        }
+        Ok(meta) => meta.is_dir(),
         Err(_) => false,
     }
 }
