@@ -1,6 +1,7 @@
 use skim::prelude::*;
 use std::io::Cursor;
 
+/// Open ui for folder picker
 pub fn select(list: String) -> Option<String> {
     let options = SkimOptionsBuilder::default()
         //.height(Some("50%"))
