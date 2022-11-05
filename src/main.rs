@@ -26,7 +26,7 @@ fn main() {
 
 fn get_item() -> Option<String> {
     match util::get_zoxide_output() {
-        Some(list) => ui::select(util::filter_folders(list)),
+        Some(list) => util::remove_running_symbol(ui::select(util::filter_folders(list))),
         None => None,
     }
 }

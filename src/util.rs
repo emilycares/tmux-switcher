@@ -1,6 +1,8 @@
 use itertools::Itertools;
 use std::{path::Path, process::Command};
 
+use crate::tmux;
+
 /// Get name of last file/folder in path
 pub fn get_basename(location: &str) -> Option<&str> {
     let path = Path::new(location);
@@ -31,9 +33,9 @@ pub fn get_zoxide_output() -> Option<String> {
         Ok(list) => {
             return Some(
                 std::str::from_utf8(&list.stdout)
-                    .unwrap_or_default()
-                    .to_owned(),
-            )
+                .unwrap_or_default()
+                .to_owned(),
+                )
         }
         Err(_) => None,
     }
@@ -47,8 +49,22 @@ pub fn filter_folders(folders: String) -> String {
         .filter(|c| is_ignored(c))
         .filter(|c| is_git_dir(c))
         .sorted()
-        .collect::<Vec<&str>>()
+        .map(running)
+        .collect::<Vec<String>>()
         .join("\n")
+}
+
+fn running(c: &str) -> String {
+    let Some(basename) = get_basename(c) else {
+        return c.to_string();
+    };
+
+    match tmux::does_session_exist(basename) {
+        true => {
+            format!("@{c}")
+        }
+        false => c.to_string()
+    }
 }
 
 /// Ignore specific dirs
@@ -68,5 +84,31 @@ fn is_git_dir(location: &str) -> bool {
     match std::fs::metadata(path) {
         Ok(meta) => meta.is_dir(),
         Err(_) => false,
+    }
+}
+
+pub fn remove_running_symbol(item: Option<String>) -> Option<String> {
+    if let Some(item) = item {
+        if item.starts_with('@') {
+            let item = item.get(1..).unwrap_or_default().to_string();
+
+            return Some(item);
+        }
+    }
+
+    None
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::util::remove_running_symbol;
+  
+    #[test]
+    fn remove_running_symbol_test() {
+      let path_with_running_symbol = Some("@/tmp/dotfiles".to_string());
+
+      let out = remove_running_symbol(path_with_running_symbol);
+
+      assert_eq!(out, Some("/tmp/dotfiles".to_string()));
     }
 }
