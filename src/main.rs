@@ -1,3 +1,5 @@
+use std::{fs, env};
+
 mod tmux;
 mod ui;
 mod util;
@@ -25,8 +27,30 @@ fn main() {
 }
 
 fn get_item() -> Option<String> {
-    match util::get_zoxide_output() {
-        Some(list) => util::remove_running_symbol(ui::select(util::filter_folders(list))),
-        None => None,
+    if let Some(list) = get_project_list() {
+
+        
+        return util::remove_running_symbol(ui::select(util::filter_folders(list)));
+    }
+    None
+}
+
+fn get_project_list() -> Option<String> {
+    if cfg!(windows) {
+        let Ok(location) = env::var("USERPROFILE") else {
+            println!("Unbale to read USERPROFILE");
+
+            return None;
+        };
+        let location = format!("{location}\\tmux-switcher.txt");
+        let Ok(content) = fs::read_to_string(&location) else {
+            println!("Unble to read file: {location}");
+
+            return None;
+        };
+
+        Some(content)
+    } else {
+        util::get_zoxide_output()
     }
 }
