@@ -93,6 +93,8 @@ pub fn remove_running_symbol(item: Option<String>) -> Option<String> {
             let item = item.get(1..).unwrap_or_default().to_string();
 
             return Some(item);
+        } else {
+            return Some(item);
         }
     }
 
