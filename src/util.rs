@@ -49,13 +49,14 @@ pub fn filter_folders(folders: String) -> String {
         .filter(|c| is_ignored(c))
         .filter(|c| is_git_dir(c))
         .sorted()
+        .map(|m| m.replace(".", "_"))
         .map(running)
         .collect::<Vec<String>>()
         .join("\n")
 }
 
-fn running(c: &str) -> String {
-    let Some(basename) = get_basename(c) else {
+fn running(c: String) -> String {
+    let Some(basename) = get_basename(&c) else {
         return c.to_string();
     };
 
