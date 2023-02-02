@@ -6,6 +6,7 @@ pub fn select(list: String) -> Option<String> {
     let options = SkimOptionsBuilder::default()
         //.height(Some("50%"))
         //.multi(false)
+        .query(Some("@"))
         .build()
         .unwrap();
 
