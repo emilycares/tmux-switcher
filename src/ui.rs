@@ -2,13 +2,14 @@ use skim::prelude::*;
 use std::io::Cursor;
 
 /// Open ui for folder picker
-pub fn select(list: String) -> Option<String> {
-    let options = SkimOptionsBuilder::default()
-        //.height(Some("50%"))
-        //.multi(false)
-        .query(Some("@"))
-        .build()
-        .unwrap();
+pub fn select(list: String, prefix: bool) -> Option<String> {
+    let mut options = SkimOptionsBuilder::default();
+    //.height(Some("50%"))
+    //.multi(false)
+    if prefix {
+        options.query(Some("@"));
+    }
+    let options = options.build().unwrap();
 
     // `SkimItemReader` is a helper to turn any `BufRead` into a stream of `SkimItem`
     // `SkimItem` was implemented for `AsRef<str>` by default

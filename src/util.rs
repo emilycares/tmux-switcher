@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::{path::Path, process::Command};
+use std::path::Path;
 
 use crate::tmux;
 
@@ -27,24 +27,9 @@ pub fn get_basename(location: &str) -> Option<&str> {
     None
 }
 
-/// Run: zoxide query -l
-pub fn get_zoxide_output() -> Option<String> {
-    match Command::new("zoxide").args(["query", "-l"]).output() {
-        Ok(list) => {
-            return Some(
-                std::str::from_utf8(&list.stdout)
-                .unwrap_or_default()
-                .to_owned(),
-                )
-        }
-        Err(_) => None,
-    }
-}
-
 /// Remove all non git folders from the input
-pub fn filter_folders(folders: String) -> String {
+pub fn filter_folders(folders: Vec<String>) -> String {
     folders
-        .split('\n')
         .into_iter()
         .filter(|c| is_ignored(c))
         .filter(|c| is_git_dir(c))
@@ -64,7 +49,7 @@ fn running(c: String) -> String {
         true => {
             format!("@{c}")
         }
-        false => c.to_string()
+        false => c.to_string(),
     }
 }
 
@@ -105,13 +90,13 @@ pub fn remove_running_symbol(item: Option<String>) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use crate::util::remove_running_symbol;
-  
+
     #[test]
     fn remove_running_symbol_test() {
-      let path_with_running_symbol = Some("@/tmp/dotfiles".to_string());
+        let path_with_running_symbol = Some("@/tmp/dotfiles".to_string());
 
-      let out = remove_running_symbol(path_with_running_symbol);
+        let out = remove_running_symbol(path_with_running_symbol);
 
-      assert_eq!(out, Some("/tmp/dotfiles".to_string()));
+        assert_eq!(out, Some("/tmp/dotfiles".to_string()));
     }
 }
