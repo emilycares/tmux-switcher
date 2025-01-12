@@ -790,7 +790,7 @@ dependencies = [
 [[package]]
 name = "quickcfg"
 version = "0.1.0"
-source = "git+https://github.com/emilycares/quickcfg#accb5fe7c070e8eb15fc7dab0197dc27003a5a81"
+source = "git+https://github.com/emilycares/quickcfg?rev=accb5fe7c070e8eb15fc7dab0197dc27003a5a81#accb5fe7c070e8eb15fc7dab0197dc27003a5a81"
 dependencies = [
  "dirs",
  "serde",
