@@ -54,7 +54,7 @@ impl Default for Storage {
         }
 
         Self {
-            use_tmux: false,
+            use_tmux: true,
             projects,
         }
     }

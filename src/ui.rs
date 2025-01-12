@@ -7,7 +7,7 @@ pub fn select(list: String, prefix: bool) -> Option<String> {
     //.height(Some("50%"))
     //.multi(false)
     if prefix {
-        options.query(Some("@"));
+        options.query(Some("@".to_string()));
     }
     let options = options.build().unwrap();
 
