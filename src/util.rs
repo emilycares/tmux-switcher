@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::path::Path;
 
-use crate::tmux;
+use crate::{tmux, ui::Folder};
 
 /// Get name of last file/folder in path
 pub fn get_basename(location: &str) -> Option<&str> {
@@ -28,7 +28,7 @@ pub fn get_basename(location: &str) -> Option<&str> {
 }
 
 /// Remove all non git folders from the input
-pub fn filter_folders(folders: Vec<String>) -> String {
+pub fn filter_folders(folders: Vec<String>) -> Vec<Folder> {
     folders
         .into_iter()
         .filter(|c| is_ignored(c))
@@ -36,8 +36,8 @@ pub fn filter_folders(folders: Vec<String>) -> String {
         .sorted()
         .map(|m| m.replace(".", "_"))
         .map(running)
-        .collect::<Vec<String>>()
-        .join("\n")
+        .map(Folder::new)
+        .collect()
 }
 
 fn running(c: String) -> String {

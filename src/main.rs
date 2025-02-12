@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 
+mod finder;
 mod tmux;
 mod ui;
 mod util;
-
-extern crate skim;
 
 #[tokio::main]
 async fn main() {
@@ -36,7 +35,7 @@ async fn main() {
 }
 
 fn get_item(list: Vec<String>, use_tmux: bool) -> Option<String> {
-    util::remove_running_symbol(ui::select(util::filter_folders(list), use_tmux))
+    util::remove_running_symbol(ui::select(util::filter_folders(list), use_tmux).map(|f| f.value))
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

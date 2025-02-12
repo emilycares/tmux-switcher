@@ -9,7 +9,6 @@ pub fn does_session_exist(name: &str) -> bool {
         let sessions = sessions.to_string();
         return sessions
             .split('\n')
-            .into_iter()
             .filter_map(|item| item.split_once(':'))
             .map(|item| item.0)
             .any(|x| x == name);

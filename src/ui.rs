@@ -1,31 +1,39 @@
-use skim::prelude::*;
-use std::io::Cursor;
+use std::fmt::Display;
+
+use crate::finder::{self, FinderItem};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Folder {
+    pub value: String,
+}
+
+impl Folder {
+    pub fn new(value: String) -> Self {
+        Folder { value }
+    }
+}
+
+impl Display for Folder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl FinderItem for Folder {
+    fn search_include(&self, search: &str) -> bool {
+        self.value.to_lowercase().to_lowercase().contains(search)
+    }
+
+    fn initial_seleted(&self) -> bool {
+        false
+    }
+}
 
 /// Open ui for folder picker
-pub fn select(list: String, prefix: bool) -> Option<String> {
-    let mut options = SkimOptionsBuilder::default();
-    //.height(Some("50%"))
-    //.multi(false)
-    if prefix {
-        options.query(Some("@".to_string()));
-    }
-    let options = options.build().unwrap();
-
-    // `SkimItemReader` is a helper to turn any `BufRead` into a stream of `SkimItem`
-    // `SkimItem` was implemented for `AsRef<str>` by default
-    let item_reader = SkimItemReader::default();
-    let items = item_reader.of_bufread(Cursor::new(list));
-
-    // `run_with` would read and show items from the stream
-    let selected_item = Skim::run_with(&options, Some(items))
-        .map(|out| out.selected_items)
-        .unwrap_or_default();
-
-    if let Some(item) = selected_item.first() {
-        let text = item.text();
-
-        return Some(text.into_owned());
-    }
-
-    None
+pub fn select(list: Vec<Folder>, prefix: bool) -> Option<Folder> {
+    let search = match prefix {
+        true => "@".to_string(),
+        false => String::new(),
+    };
+    finder::ui(list, search).unwrap()
 }
