@@ -21,7 +21,17 @@ impl Display for Folder {
 
 impl FinderItem for Folder {
     fn search_include(&self, search: &str) -> bool {
-        self.value.to_lowercase().to_lowercase().contains(search)
+        if search.starts_with("@") {
+            if !self.value.starts_with("@") {
+                return false;
+            }
+        }
+        let search = search.trim_start_matches("@");
+        self.value
+            .trim_start_matches("@")
+            .to_lowercase()
+            .to_lowercase()
+            .contains(search)
     }
 
     fn initial_seleted(&self) -> bool {

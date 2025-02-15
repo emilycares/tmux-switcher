@@ -5,12 +5,36 @@ mod tmux;
 mod ui;
 mod util;
 
+
+use clap::Parser;
+
+/// A build log analysis tool
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+pub struct Args {
+    /// Add this folder to the choosable locaions
+    #[clap(long)]
+    pub add_this: bool,
+}
+
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
     let storage_location = &quickcfg::get_location("tmux-switcher")
         .await
         .expect("Unable to get storage dir");
-    let storage: Storage = quickcfg::load(storage_location).await;
+    let mut storage: Storage = quickcfg::load(storage_location).await;
+
+    if args.add_this {
+        if let Ok(current_dir) = std::env::current_dir() {
+            storage
+                .projects
+                .push(current_dir.to_string_lossy().to_string());
+            let _ = quickcfg::save(storage, storage_location).await;
+        }
+
+        return;
+    }
 
     if let Some(folder) = get_item(storage.projects, storage.use_tmux) {
         if storage.use_tmux {
